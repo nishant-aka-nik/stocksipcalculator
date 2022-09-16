@@ -1,38 +1,32 @@
 package main
 
 import (
-	"net/http"
-	"stocksipcalculator/model"
-	"time"
+	"context"
+	"log"
+	"os"
+	"stocksipcalculator/handlers"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-var recipies []model.Recipe
+var stockHandler *handlers.StockHandler
 
 func init() {
-	recipies = make([]model.Recipe, 0)
-}
-
-func NewRecipeHandler(c *gin.Context) {
-	var recipe model.Recipe
-	err := c.ShouldBindJSON(&recipe)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
+	ctx := context.Background()
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("MONGO_URI")))
+	if err = client.Ping(context.TODO(), readpref.Primary()); err != nil {
+		log.Fatal(err)
 	}
-	recipe.ID = uuid.NewString()
-	recipe.PublishedAt = time.Now().UTC()
-
-	recipies = append(recipies, recipe)
-	c.JSON(http.StatusOK, recipe)
+	log.Println("Connected to MongoDB")
+	database := client.Database(os.Getenv("MONGO_DATABASE"))
+	stockHandler = handlers.NewStockHandler(ctx, database)
 }
 
 func main() {
 	router := gin.Default()
-	router.POST("/recipes", NewRecipeHandler)
+	router.POST("/rule", stockHandler.Rule)
 	router.Run()
 }
