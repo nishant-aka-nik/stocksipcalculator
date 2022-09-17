@@ -6,9 +6,16 @@ type Rule struct {
 }
 
 type StockRule struct {
-	ID               string  `bson:"id"`
 	StockName        string  `json:"stockname" bson:"stockname"`
-	TargetPercentage float32 `json:"targetpercentage" bson:"targetpercentage"`
-	TargetPrice      float32 `json:"targetprice" bson:"targetprice"`
-	Alerted          bool    `bson:"alerted"`
+	TargetPercentage float64 `json:"targetpercentage" bson:"targetpercentage"`
+	TargetPrice      float64 `json:"targetprice" bson:"targetprice"`
+}
+
+type DBRule struct {
+	ID          string  `bson:"id"`
+	StockName   string  `json:"stockname" bson:"stockname"`
+	TargetPrice float64 `json:"targetprice" bson:"targetprice"`
+	UPBelow     string  `bson:"upbelow"`
+	Alerted     bool    `bson:"alerted"`
+	Email       string  `json:"email" bson:"email"`
 }

@@ -1,9 +1,11 @@
 package mappers
 
 import (
+	"bytes"
 	"net/mail"
 	"regexp"
 	"stocksipcalculator/model"
+	"strings"
 )
 
 func ValidateReq(rule model.Rule) model.StocksError {
@@ -38,4 +40,25 @@ func validateStockName(stockName string) bool {
 func validateEmail(email string) bool {
 	_, err := mail.ParseAddress(email)
 	return err == nil
+}
+
+func GenerateStockSlice(stockRule []model.StockRule) []string {
+	var stockNames []string
+	//generate a slice of stock names
+	for _, rule := range stockRule {
+		var b bytes.Buffer
+		stockName := strings.ToUpper(rule.StockName)
+		b.WriteString(stockName)
+		b.WriteString(".NS")
+		stockNames = append(stockNames, b.String())
+	}
+	return stockNames
+}
+
+func GenerateStockTicker(stockName string) string {
+	var b bytes.Buffer
+	stockName = strings.ToUpper(stockName)
+	b.WriteString(stockName)
+	b.WriteString(".NS")
+	return b.String()
 }

@@ -43,5 +43,10 @@ func (handler *StockHandler) Rule(c *gin.Context) {
 		return
 	}
 
+	err := controllers.AddRule(rule)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, nil)
+	}
+
 	c.JSON(http.StatusOK, rule)
 }
