@@ -1,7 +1,6 @@
 package mappers
 
 import (
-	"fmt"
 	"net/mail"
 	"regexp"
 	"stocksipcalculator/model"
@@ -15,15 +14,13 @@ func ValidateReq(rule model.Rule) model.StocksError {
 		}
 	}
 
-	if len(stockError.InvalidStocks) == 0 {
+	if len(stockError.InvalidStocks) != 0 {
 		return model.StocksError{
 			ErrorMsg:      "invalid stock name",
 			InvalidStocks: stockError.InvalidStocks,
 		}
 	}
 
-	fmt.Println(rule.Email)
-	fmt.Println(validateEmail(rule.Email))
 	if !validateEmail(rule.Email) {
 		return model.StocksError{
 			ErrorMsg: "invalid email address",
@@ -37,6 +34,7 @@ func validateStockName(stockName string) bool {
 	return regexp.MustCompile(`^[a-zA-Z]+$`).MatchString(stockName)
 }
 
+//TODO: fix email validation make it more robust
 func validateEmail(email string) bool {
 	_, err := mail.ParseAddress(email)
 	return err == nil
