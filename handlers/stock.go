@@ -3,22 +3,20 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"stocksipcalculator/controllers"
 	"stocksipcalculator/mappers"
 	"stocksipcalculator/model"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type StockHandler struct {
-	database *mongo.Database
-	ctx      context.Context
+	ctx context.Context
 }
 
-func NewStockHandler(ctx context.Context, database *mongo.Database) *StockHandler {
+func NewStockHandler(ctx context.Context) *StockHandler {
 	return &StockHandler{
-		database: database,
-		ctx:      ctx,
+		ctx: ctx,
 	}
 }
 
@@ -26,14 +24,19 @@ func (handler *StockHandler) Rule(c *gin.Context) {
 	var rule model.Rule
 
 	if err := c.ShouldBindJSON(&rule); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error()})
+		c.JSON(http.StatusBadRequest, model.StocksError{
+			ErrorMsg: err.Error(),
+		})
 		return
 	}
 
-	if err := mappers.ValidateReq(rule); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error()})
+	if invalidStocks := mappers.ValidateReq(rule); invalidStocks.InvalidStocks != nil {
+		c.JSON(http.StatusBadRequest, invalidStocks)
+		return
+	}
+
+	if invalidStocks := controllers.ValidateStockName(rule.StockRules); invalidStocks.InvalidStocks != nil {
+		c.JSON(http.StatusBadRequest, invalidStocks)
 		return
 	}
 

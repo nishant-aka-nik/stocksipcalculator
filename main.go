@@ -21,8 +21,8 @@ func init() {
 		log.Fatal(err)
 	}
 	log.Println("Connected to MongoDB")
-	database := client.Database(os.Getenv("MONGO_DATABASE"))
-	stockHandler = handlers.NewStockHandler(ctx, database)
+	// database := client.Database(os.Getenv("MONGO_DATABASE"))
+	stockHandler = handlers.NewStockHandler(ctx)
 }
 
 func main() {
