@@ -22,6 +22,7 @@ func NewStockHandler(ctx context.Context) *StockHandler {
 
 func (handler *StockHandler) Rule(c *gin.Context) {
 	var rule model.Rule
+	var invalidStocks model.StocksError
 
 	if err := c.ShouldBindJSON(&rule); err != nil {
 		c.JSON(http.StatusBadRequest, model.StocksError{
@@ -30,12 +31,14 @@ func (handler *StockHandler) Rule(c *gin.Context) {
 		return
 	}
 
-	if invalidStocks := mappers.ValidateReq(rule); invalidStocks.InvalidStocks != nil {
+	invalidStocks = mappers.ValidateReq(rule)
+	if invalidStocks.ErrorMsg != "" {
 		c.JSON(http.StatusBadRequest, invalidStocks)
 		return
 	}
 
-	if invalidStocks := controllers.ValidateStockName(rule.StockRules); invalidStocks.InvalidStocks != nil {
+	invalidStocks = controllers.ValidateStockName(rule.StockRules)
+	if invalidStocks.ErrorMsg != "" {
 		c.JSON(http.StatusBadRequest, invalidStocks)
 		return
 	}
