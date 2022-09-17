@@ -1,22 +1,36 @@
 package mappers
 
 import (
-	"errors"
+	"fmt"
 	"net/mail"
 	"regexp"
 	"stocksipcalculator/model"
 )
 
-func ValidateReq(rule model.Rule) error {
+func ValidateReq(rule model.Rule) model.StocksError {
+	var stockError model.StocksError
 	for _, stockRule := range rule.StockRules {
 		if !validateStockName(stockRule.StockName) {
-			return errors.New("invalid stock name")
+			stockError.InvalidStocks = append(stockError.InvalidStocks, stockRule.StockName)
 		}
 	}
-	if !validateEmail(rule.Email) {
-		return errors.New("invalid email address")
+
+	if len(stockError.InvalidStocks) == 0 {
+		return model.StocksError{
+			ErrorMsg:      "invalid stock name",
+			InvalidStocks: stockError.InvalidStocks,
+		}
 	}
-	return nil
+
+	fmt.Println(rule.Email)
+	fmt.Println(validateEmail(rule.Email))
+	if !validateEmail(rule.Email) {
+		return model.StocksError{
+			ErrorMsg: "invalid email address",
+		}
+	}
+
+	return model.StocksError{}
 }
 
 func validateStockName(stockName string) bool {
